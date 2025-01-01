@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include<iostream>
 #include "LibraryDataStructure.h"
 using namespace std;
@@ -48,11 +48,11 @@ template<class T>
 BTree<T>::BNode::BNode(int _m)
 {
 	this->m = _m;		//max num of records in node +1
-	T* records = new T[m];
-	BNode** sons = new BNode[][m + 1];
-	BNode* parent = nullptr;
-	int numOfRecords = 0;
-	int numOfSons = 0;
+	records = new T[m];
+	sons = new BNode * [_m + 1] {nullptr};
+ parent = nullptr;
+	numOfRecords = 0;
+	numOfSons = 0;
 	//TODO: fix
 }
 
@@ -119,7 +119,6 @@ void BTree<T>::BNode::remove(T record)
 			return;
 		}
 	}
-
 	//TODO: fix
 }
 
@@ -142,6 +141,12 @@ BTree<T>::BTree(int degree) :m(degree), root(nullptr) {}
 template<class T>
 void BTree<T>::insert(T record)
 {
+	if (root == nullptr)
+		root = new BNode(m);
+	BNode* x = findAddNode(root, record);
+	x->insert(record);
+	if (x->numOfRecords == m)
+		split(x);
 	// TODO: fix
 }
 
@@ -228,43 +233,53 @@ typename BTree<T>::BNode* BTree<T>::findAddNode(BNode* current, T record)
 template <class T>
 void BTree<T>::split(BNode* current)
 {
-	int num;
-	if ((this->m) % 2 == 0) //if m is zugi
-		num = (this->m) / 2;
-	else // if m is ei-zugi
-		num = (this->m) / 2 + 1;
+	int middle = (this->m) / 2;
+	
+	BNode* parentNode = current->parent;
+	BNode * left = new BNode((this->m)),*right = new BNode((this->m));
+	
+	for (int i = 0; i < middle; i++)
+		left->insert(current->records[i]);
 
+	for (int i = middle +1; i < current->numOfRecords; i++)
+		right->insert(current->records[i]);
 
-	BNode* ptr = new BNode();
-	ptr = current->records[num - 1];
-	ptr->parent = current->parent;
-
-	for (int i = 0; i < current->numOfRecords; i++)
-	{
-		if (i < num - 1)
-		{
-			ptr->sons[i] = current->records[i];
-
-
+	if (!current->isLeaf()) {
+		for (int i = 0; i <= middle; i++) {
+			left->sons[i] = current->sons[i];
+			current->sons[i]->parent = left;
+			left->numOfSons++;
 		}
-		else if (i > num - 1)
-		{
-			ptr->sons[i - 1] = current->records[i];
 
-
+		for (int i = middle + 1; i <= m; i++) { 
+			right->sons[i - (middle + 1)] = current->sons[i];
+			current->sons[i]->parent = right;
+			right->numOfSons++;
 		}
 	}
+	right->parent = parentNode;
+	left->parent = parentNode;
 
-	delete[] current;
-	current = ptr; //current now point on new tree.
-	for (int i = 0; i < ptr->numOfSons; i++)
-	{
-
-
+	if (!parentNode) { //case currnt the root
+		parentNode = new BNode(this->m);
+		parentNode->sons[0] = left;
+		parentNode->sons[1] = right;
+		parentNode->numOfSons = 2;
+		parentNode->insert( current->records[middle] );
+		root = parentNode;
+		return;
 	}
+
+	parentNode->insert(current->records[middle]); //case it`s  inner node, so split into 2 and add the middle to the parent
+	
+	//need to order the sons 
+
+	if (parentNode->numOfRecords == m)
+		split(parentNode);//case the parnt need also split call recursivly
 
 	// TODO: fix
 }
+
 
 
 template<class T>
