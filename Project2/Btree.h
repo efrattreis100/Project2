@@ -189,7 +189,8 @@ void BTree<T>::inorder(BNode* current)
 	for (int i = 0; i < current->numOfSons; i++) //inorder: left-current-right
 	{
 		inorder(current->sons[i]);
-		current->printKeys();
+		if (i != current->numOfRecords)
+			current->printKeys();
 	}
 
 	// TODO: fix
@@ -272,21 +273,6 @@ void BTree<T>::split(BNode* current)
 	left->parent = parentNode;
 	parentNode->insert(current->records[middle]);
 
-
-	/*int position = 0;
-	while (position < parentNode->numOfRecords && parentNode->records[position] < current->records[middle]) {
-		position++;
-	}
-
-	for (int j = parentNode->numOfSons; j > position + 1; j--) {
-		parentNode->sons[j] = parentNode->sons[j - 1];
-	}
-
-	parentNode->sons[position] = left;
-	parentNode->sons[position + 1] = right;
-
-	parentNode->numOfSons++;*/
-	
 	int position = 0;
 	while (parentNode->sons[position] != current && position < parentNode->numOfSons) {
 		position++;
