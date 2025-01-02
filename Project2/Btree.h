@@ -87,12 +87,6 @@ void BTree<T>::BNode::insert(T record)
 
 			T temp = records[i];
 			records[i] = record;
-			for (int j = i + 1; j < numOfRecords + 1; j++)
-			{
-				T temp2 = records[j];
-				records[j] = temp;
-				temp = temp2;
-			}
 			numOfRecords++;
 			return;
 		}
