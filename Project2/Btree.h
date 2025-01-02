@@ -50,7 +50,7 @@ BTree<T>::BNode::BNode(int _m)
 	this->m = _m;		//max num of records in node +1
 	records = new T[m];
 	sons = new BNode * [_m + 1] {nullptr};
- parent = nullptr;
+    parent = nullptr;
 	numOfRecords = 0;
 	numOfSons = 0;
 	//TODO: fix
@@ -80,14 +80,13 @@ bool BTree<T>::BNode::isLeaf()
 template<class T>
 void BTree<T>::BNode::insert(T record)
 {
-	for (int i = 0; i < numOfRecords; i++)
-	{
-		if (records[i] > record)
-		{
-
-			T temp = records[i];
+	for (int i = 0; i <= numOfRecords; i++) {
+		if (records[i] > record ) { 
+			for (int j = numOfRecords; j > i; j--) {
+				records[j] = records[j - 1];
+			}
 			records[i] = record;
-			numOfRecords++;
+			numOfRecords++; 
 			return;
 		}
 	}
@@ -153,23 +152,25 @@ void BTree<T>::clear(BNode* current)
 		return;
 	if (current->isLeaf()) //whithout sons
 	{
-		current->~BNode();
+		delete current;
 		return;
 	}
 	for (int i = 0; i < current->numOfSons; i++) //because postorder is: left-right-current
 	{
 		clear(current->sons[i]);
 	}
-
-	current->~BNode(); //in the end delete this b-node
-
+	if(current)
+		delete current; //in the end delete this b-node
+	current = nullptr;
 	// TODO: fix
 }
 
 template<class T>
 BTree<T>::~BTree()
 {
-	clear(this->root);
+	if(root)
+		clear(root);
+	root = nullptr;
 	// TODO: fix
 }
 
