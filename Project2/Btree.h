@@ -252,20 +252,26 @@ void BTree<T>::split(BNode* current)
 			right->numOfSons++;
 		}
 	}
-	right->parent = parentNode;
-	left->parent = parentNode;
-
+	
+	
 	if (!parentNode) { //case currnt the root
 		parentNode = new BNode(this->m);
 		parentNode->sons[0] = left;
 		parentNode->sons[1] = right;
+		right->parent = parentNode;
+		left->parent = parentNode;
 		parentNode->numOfSons = 2;
 		parentNode->insert( current->records[middle] );
 		root = parentNode;
+		//delete current;
+		//current = nullptr;
 		return;
 	}
 	else{
+	right->parent = parentNode;
+	left->parent = parentNode;
 	parentNode->insert(current->records[middle]);
+	
 	int position = 0;
 	while (parentNode->sons[position] != current && position < parentNode->numOfSons) {
 		position++;
@@ -278,11 +284,10 @@ void BTree<T>::split(BNode* current)
 	parentNode->sons[position] = left;
 	parentNode->sons[position + 1] = right;
 	parentNode->numOfSons++;
+
 }
 
-	current = nullptr;
-
-	if (parentNode->numOfRecords == m)
+if (parentNode->numOfRecords == m)
 		split(parentNode);//case the parnt need also split call recursivly
 }
 
