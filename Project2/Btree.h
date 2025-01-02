@@ -269,15 +269,26 @@ void BTree<T>::split(BNode* current)
 		root = parentNode;
 		return;
 	}
+	else{
+	parentNode->insert(current->records[middle]);
+	int position = 0;
+	while (parentNode->sons[position] != current && position < parentNode->numOfSons) {
+		position++;
+	}
 
-	parentNode->insert(current->records[middle]); //case it`s  inner node, so split into 2 and add the middle to the parent
-	
-	//need to order the sons 
+	for (int i = parentNode->numOfSons; i > position + 1; i--) {
+		parentNode->sons[i] = parentNode->sons[i - 1];
+	}
+
+	parentNode->sons[position] = left;
+	parentNode->sons[position + 1] = right;
+	parentNode->numOfSons++;
+}
+
+	current = nullptr;
 
 	if (parentNode->numOfRecords == m)
 		split(parentNode);//case the parnt need also split call recursivly
-
-	// TODO: fix
 }
 
 
@@ -311,7 +322,6 @@ T* BTree<T>::search(int key) {
 	T* ptr = search(this->root, key, counter);
 
 	cout << "The search involved scanning " << counter << " nodes" << endl;
-
 
 	if (ptr == nullptr)
 		return nullptr;

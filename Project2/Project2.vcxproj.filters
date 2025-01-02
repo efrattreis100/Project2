@@ -21,7 +21,7 @@
     <ClInclude Include="Book.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Btree.h">
+    <ClInclude Include="BTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AVL.h">

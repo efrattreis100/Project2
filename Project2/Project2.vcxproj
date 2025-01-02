@@ -129,7 +129,7 @@
   <ItemGroup>
     <ClInclude Include="AVL.h" />
     <ClInclude Include="Book.h" />
-    <ClInclude Include="Btree.h" />
+    <ClInclude Include="BTree.h" />
     <ClInclude Include="Library.h" />
     <ClInclude Include="LibraryDataStructure.h" />
   </ItemGroup>
