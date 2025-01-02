@@ -271,6 +271,21 @@ void BTree<T>::split(BNode* current)
 	right->parent = parentNode;
 	left->parent = parentNode;
 	parentNode->insert(current->records[middle]);
+
+
+	/*int position = 0;
+	while (position < parentNode->numOfRecords && parentNode->records[position] < current->records[middle]) {
+		position++;
+	}
+
+	for (int j = parentNode->numOfSons; j > position + 1; j--) {
+		parentNode->sons[j] = parentNode->sons[j - 1];
+	}
+
+	parentNode->sons[position] = left;
+	parentNode->sons[position + 1] = right;
+
+	parentNode->numOfSons++;*/
 	
 	int position = 0;
 	while (parentNode->sons[position] != current && position < parentNode->numOfSons) {
