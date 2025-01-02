@@ -50,21 +50,18 @@ BTree<T>::BNode::BNode(int _m)
 	this->m = _m;		//max num of records in node +1
 	records = new T[m];
 	sons = new BNode * [_m + 1] {nullptr};
-    parent = nullptr;
+	parent = nullptr;
 	numOfRecords = 0;
 	numOfSons = 0;
 	//TODO: fix
 }
-
 template<class T>
 BTree<T>::BNode::~BNode()
 {
 	delete[] records;
-	for (int i = 0; i < numOfRecords; i++)
-	{
-		delete sons[i];
-	}
-	delete[] sons;
+	if (sons)
+		delete[] sons;
+	sons = nullptr;
 
 	//TODO: fix
 }
@@ -80,13 +77,20 @@ bool BTree<T>::BNode::isLeaf()
 template<class T>
 void BTree<T>::BNode::insert(T record)
 {
-	for (int i = 0; i <= numOfRecords; i++) {
-		if (records[i] > record ) { 
-			for (int j = numOfRecords; j > i; j--) {
-				records[j] = records[j - 1];
-			}
+	for (int i = 0; i < numOfRecords; i++)
+	{
+		if (records[i] > record)
+		{
+
+			T temp = records[i];
 			records[i] = record;
-			numOfRecords++; 
+			for (int j = i + 1; j < numOfRecords + 1; j++)
+			{
+				T temp2 = records[j];
+				records[j] = temp;
+				temp = temp2;
+			}
+			numOfRecords++;
 			return;
 		}
 	}
@@ -94,6 +98,7 @@ void BTree<T>::BNode::insert(T record)
 	numOfRecords++;
 	//TODO: fix
 }
+
 
 template<class T>
 void BTree<T>::BNode::remove(T record)
@@ -115,6 +120,7 @@ void BTree<T>::BNode::remove(T record)
 	//TODO: fix
 }
 
+
 template<class T>
 void BTree<T>::BNode::printKeys()
 {
@@ -130,6 +136,14 @@ void BTree<T>::BNode::printKeys()
 template<class T>
 BTree<T>::BTree(int degree) :m(degree), root(nullptr) {}
 
+template<class T>
+BTree<T>::~BTree()
+{
+	if (root)
+		clear(root);
+	root = nullptr;
+	// TODO: fix
+}
 
 template<class T>
 void BTree<T>::insert(T record)
@@ -144,7 +158,12 @@ void BTree<T>::insert(T record)
 }
 
 
-//private recursive help fuctions
+template<class T>
+void BTree<T>::inorder()
+{
+	inorder(this->root);
+	// TODO: fix
+}
 template<class T>
 void BTree<T>::clear(BNode* current)
 {
@@ -159,21 +178,11 @@ void BTree<T>::clear(BNode* current)
 	{
 		clear(current->sons[i]);
 	}
-	if(current)
+	if (current)
 		delete current; //in the end delete this b-node
 	current = nullptr;
 	// TODO: fix
 }
-
-template<class T>
-BTree<T>::~BTree()
-{
-	if(root)
-		clear(root);
-	root = nullptr;
-	// TODO: fix
-}
-
 
 template<class T>
 void BTree<T>::inorder(BNode* current)
@@ -193,13 +202,6 @@ void BTree<T>::inorder(BNode* current)
 			current->printKeys();
 	}
 
-	// TODO: fix
-}
-
-template<class T>
-void BTree<T>::inorder()
-{
-	inorder(this->root);
 	// TODO: fix
 }
 
@@ -230,14 +232,14 @@ template <class T>
 void BTree<T>::split(BNode* current)
 {
 	int middle = (this->m) / 2;
-	
+
 	BNode* parentNode = current->parent;
-	BNode * left = new BNode((this->m)),*right = new BNode((this->m));
-	
+	BNode* left = new BNode((this->m)), * right = new BNode((this->m));
+
 	for (int i = 0; i < middle; i++)
 		left->insert(current->records[i]);
 
-	for (int i = middle +1; i < current->numOfRecords; i++)
+	for (int i = middle + 1; i < current->numOfRecords; i++)
 		right->insert(current->records[i]);
 
 	if (!current->isLeaf()) {
@@ -247,14 +249,14 @@ void BTree<T>::split(BNode* current)
 			left->numOfSons++;
 		}
 
-		for (int i = middle + 1; i <= m; i++) { 
+		for (int i = middle + 1; i <= m; i++) {
 			right->sons[i - (middle + 1)] = current->sons[i];
 			current->sons[i]->parent = right;
 			right->numOfSons++;
 		}
 	}
-	
-	
+
+
 	if (!parentNode) { //case currnt the root
 		parentNode = new BNode(this->m);
 		parentNode->sons[0] = left;
@@ -262,73 +264,66 @@ void BTree<T>::split(BNode* current)
 		right->parent = parentNode;
 		left->parent = parentNode;
 		parentNode->numOfSons = 2;
-		parentNode->insert( current->records[middle] );
+		parentNode->insert(current->records[middle]);
 		root = parentNode;
 		//delete current;
 		//current = nullptr;
 		return;
 	}
-	else{
-	right->parent = parentNode;
-	left->parent = parentNode;
-	parentNode->insert(current->records[middle]);
+	else {
+		right->parent = parentNode;
+		left->parent = parentNode;
+		parentNode->insert(current->records[middle]);
 
-	int position = 0;
-	while (parentNode->sons[position] != current && position < parentNode->numOfSons) {
-		position++;
+		int position = 0;
+		while (parentNode->sons[position] != current && position < parentNode->numOfSons) {
+			position++;
+		}
+
+		for (int i = parentNode->numOfSons; i > position + 1; i--) {
+			parentNode->sons[i] = parentNode->sons[i - 1];
+		}
+
+		parentNode->sons[position] = left;
+		parentNode->sons[position + 1] = right;
+		parentNode->numOfSons++;
+
 	}
 
-	for (int i = parentNode->numOfSons; i > position + 1; i--) {
-		parentNode->sons[i] = parentNode->sons[i - 1];
-	}
-
-	parentNode->sons[position] = left;
-	parentNode->sons[position + 1] = right;
-	parentNode->numOfSons++;
-
-}
-
-if (parentNode->numOfRecords == m)
+	if (parentNode->numOfRecords == m)
 		split(parentNode);//case the parnt need also split call recursivly
 }
 
-
-
 template<class T>
-T* BTree<T>::search(BNode* current, int key, int& counter)
-{
+T* BTree<T>::search(BNode* current, int key, int& counter) {
+	if (!current) return nullptr;
+
 	counter++;
-	for (int i = 0; i < current->numOfRecords; i++)
-	{
-		if (key == current->records[i].getKey())
-		{
-			T* ptr = (T*)current;
-			return ptr;
-		}
-		if (key < current->records[i].getKey())
-		{
-			return search(current->sons[i], key, counter);
-		}
+	int i = 0;
+	while (i < current->numOfRecords && current->records[i].getKey() < key) {
+		i++;
 	}
-	//if key not exiest in this node. 
-	return search(current->sons[current->numOfRecords], key, counter);
-	// TODO: fix
-	return nullptr;
+	if (i < current->numOfRecords && current->records[i].getKey() == key) {
+		return &current->records[i];
+	}
+
+	if (current->isLeaf()) {
+		return nullptr;
+	}
+	return search(current->sons[i], key, counter);
 }
+
 
 template<class T>
 T* BTree<T>::search(int key) {
 
 	int counter = 0;
 	T* ptr = search(this->root, key, counter);
-
 	cout << "The search involved scanning " << counter << " nodes" << endl;
-
-	if (ptr == nullptr)
-		return nullptr;
 	return ptr;
-
 	// TODO: fix
 
 }
+
+
 
